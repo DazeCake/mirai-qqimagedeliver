@@ -10,6 +10,13 @@ group = "moe.dazecake"
 version = "0.1.0"
 
 repositories {
-    maven("https://maven.aliyun.com/repository/public")
     mavenCentral()
+    maven("https://maven.aliyun.com/repository/public")
+}
+
+dependencies {
+    implementation("io.ktor:ktor-server-core:2.2.1")
+    implementation("io.ktor:ktor-server-netty:2.2.1")
+    implementation("io.ktor:ktor-server-content-negotiation:2.2.1")
+    implementation("io.ktor:ktor-serialization-gson:2.2.1")
 }
