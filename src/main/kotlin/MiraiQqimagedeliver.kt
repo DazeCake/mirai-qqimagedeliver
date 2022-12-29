@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.request.*
+import kotlinx.coroutines.launch
 import moe.dazecake.entity.Sender
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroupOrNull
@@ -35,41 +35,50 @@ object MiraiQqimagedeliver : KotlinPlugin(
 ) {
     @OptIn(ConsoleExperimentalApi::class)
     override fun onEnable() {
-        logger.info { "Plugin loaded" }
+        logger.info { "消息推送插件已载入，等待机器人登录..." }
 
         GlobalEventChannel.subscribeOnce<BotOnlineEvent>{
             event -> val bot = event.bot
-            embeddedServer(Netty, port = 49875) {
-                install(ContentNegotiation){
-                    gson()
-                }
-                routing {
-                    get("/status") {
-                        call.respondText("通知服务器正常运行中\n" +
-                                "当前Bot: ${bot.id}\n" +
-                                "状态: ${if (bot.isOnline) "在线" else "掉线，请重新登录或执行重启"}")
+            launch {
+                logger.info { "已开启消息推送服务，浏览器访问 http://本机ip:49875/status 获取运行状态" }
+                embeddedServer(Netty, port = 49875) {
+                    install(ContentNegotiation){
+                        gson()
                     }
-                    post("/") {
-                        val msg = call.receive<Sender>()
-
-                        val msgChain:MessageChain = if (msg.image != "") {
-                            val img = Base64.getDecoder().decode(msg.image).toExternalResource()
-                            buildMessageChain {
-                                +Image(bot.getFriendOrGroupOrNull(msg.to)?.uploadImage(img)!!.imageId)
-                                +PlainText(msg.info)
-                            }
-                        } else {
-                            buildMessageChain{
-                                +PlainText(msg.info)
-                            }
+                    routing {
+                        get("/status") {
+                            call.respondText("通知服务器正常运行中\n" +
+                                    "当前Bot: ${bot.id}\n" +
+                                    "状态: ${if (bot.isOnline) "在线" else "掉线，请重新登录或执行重启"}" +
+                                    "终端填写地址:  http://本机ip:49875/")
                         }
+                        post("/") {
+                            val msg = (if (call.parameters["image"]!=null) call.parameters["image"] else "")?.let { it1 ->
+                                Sender(
+                                    it1,
+                                    call.parameters["to"]!!.toLong(),
+                                    call.parameters["info"]!!)
+                            }
 
-                        bot.getFriendOrGroupOrNull(msg.to)?.sendMessage(msgChain)
+                            val msgChain:MessageChain = if (msg?.image != "") {
+                                val img = Base64.getDecoder().decode(msg?.image).toExternalResource()
+                                buildMessageChain {
+                                    +Image(bot.getFriendOrGroupOrNull(msg!!.to)?.uploadImage(img)!!.imageId)
+                                    +PlainText(msg.info)
+                                }
+                            } else {
+                                buildMessageChain{
+                                    +PlainText(msg.info)
+                                }
+                            }
 
-                        call.respondText("success")
+                            bot.getFriendOrGroupOrNull(msg!!.to)?.sendMessage(msgChain)
+
+                            call.respondText("success")
+                        }
                     }
-                }
-            }.start(wait = true)
+                }.start(wait = true)
+            }
         }
     }
 }
