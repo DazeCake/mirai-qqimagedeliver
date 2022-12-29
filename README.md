@@ -26,7 +26,7 @@ wget https://download.fastgit.org/iTXTech/mirai-console-loader/releases/download
 unzip mcl-2.1.2.zip
 chmod +x mcl
 mkdir plugins
-wget -P ./plugins https://download.fastgit.org/DazeCake/mirai-qqimagedeliver/releases/download/v0.1.0/mirai-qqimagedeliver-0.1.0.mirai2.jar
+wget -P ./plugins https://download.fastgit.org/DazeCake/mirai-qqimagedeliver/releases/download/v0.2.0/mirai-qqimagedeliver-0.1.0.mirai2.jar
 ```
 
 ### 登录
@@ -50,6 +50,7 @@ login qq号 密码 ANDROID_PAD
 通知服务器正常运行中
 当前Bot: xxxxxxxxxx
 状态: 在线
+终端填写地址: http://本机ip:49875/
 ```
 
 说明通知服务已经部署好了，可以使用 `http://你的IP:49875/` 接收来自速通的通知

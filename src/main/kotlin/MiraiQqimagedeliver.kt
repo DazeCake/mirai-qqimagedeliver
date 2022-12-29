@@ -50,7 +50,7 @@ object MiraiQqimagedeliver : KotlinPlugin(
                             call.respondText("通知服务器正常运行中\n" +
                                     "当前Bot: ${bot.id}\n" +
                                     "状态: ${if (bot.isOnline) "在线" else "掉线，请重新登录或执行重启"}" +
-                                    "终端填写地址:  http://本机ip:49875/")
+                                    "终端填写地址: http://本机ip:49875/")
                         }
                         post("/") {
                             val msg = (if (call.parameters["image"]!=null) call.parameters["image"] else "")?.let { it1 ->
