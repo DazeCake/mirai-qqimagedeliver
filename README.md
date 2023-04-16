@@ -35,10 +35,13 @@ wget -P ./plugins https://download.fastgit.org/DazeCake/mirai-qqimagedeliver/rel
 
 ```
 ./mcl
-login qq号 密码 ANDROID_PAD
+login qq号 密码
 ```
 
-之后根据提示操作，若仍有疑惑，请访问 [使用篇 /02/ 在控制台登录 | 数据消散 (mrxiaom.top)](https://wiki.mrxiaom.top/zh/mirai/1-2)
+之后根据提示操作，若仍有疑惑或者出现登录失败，请参考 
+
+- [无法登录的临时处理方案](https://mirai.mamoe.net/topic/223/%E6%97%A0%E6%B3%95%E7%99%BB%E5%BD%95%E7%9A%84%E4%B8%B4%E6%97%B6%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88)
+- [使用篇 /02/ 在控制台登录 | 数据消散 (mrxiaom.top)](https://wiki.mrxiaom.top/zh/mirai/1-2)
 
 ## 检查运行状态
 
