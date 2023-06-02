@@ -11,11 +11,13 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.launch
 import moe.dazecake.entity.Sender
 import moe.dazecake.utils.ParamsGetter
+import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroupOrNull
 import net.mamoe.mirai.event.GlobalEventChannel
+import net.mamoe.mirai.event.events.BotOfflineEvent
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChain
@@ -38,8 +40,12 @@ object MiraiQqimagedeliver : KotlinPlugin(
     @OptIn(ConsoleExperimentalApi::class)
     override fun onEnable() {
         logger.info { "消息推送插件已载入，等待机器人登录..." }
+        val bots = mutableListOf<Bot>()
+        GlobalEventChannel.subscribeAlways<BotOnlineEvent> { bots.add(this.bot) }
+        GlobalEventChannel.subscribeAlways<BotOfflineEvent> { bots.remove(this.bot) }
+
         GlobalEventChannel.subscribeOnce<BotOnlineEvent>{
-            event -> val bot = event.bot
+            event ->
             launch {
                 logger.info { "已开启消息推送服务，浏览器访问 http://本机ip:49875/status 获取运行状态" }
                 embeddedServer(Netty, port = 49875) {
@@ -48,12 +54,17 @@ object MiraiQqimagedeliver : KotlinPlugin(
                     }
                     routing {
                         get("/status") {
-                            call.respondText("通知服务器正常运行中\n" +
-                                    "当前Bot: ${bot.id}\n" +
-                                    "状态: ${if (bot.isOnline) "在线" else "掉线，请重新登录或执行重启"}" +
-                                    "终端填写地址: 本机ip:49875")
+                            val statusBuilder = StringBuilder()
+                            statusBuilder.append("通知服务器正常运行中\n")
+                            for (bot in bots) {
+                                val status = if (bot.isOnline) "在线" else "掉线，请重新登录或执行重启"
+                                statusBuilder.append("当前Bot: ${bot.id}" + "状态: $status\n")
+                            }
+                            statusBuilder.append("终端填写地址: 本机ip:49875")
+                            call.respondText(statusBuilder.toString())
                         }
                         post("/") {
+                            val bot = bots.random()
                             val msg = Sender("",0L,"")
                             ParamsGetter.getParameter("?${call.receiveText()}")?.forEach {
                                 if (it.key == "image") {
